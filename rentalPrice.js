@@ -1,4 +1,3 @@
-
 class CarRental {
   static CAR_CLASSES = ["Compact", "Electric", "Cabrio", "Racer"];
   static SEASONS = { LOW: "Low", HIGH: "High" };
@@ -54,7 +53,7 @@ class CarRental {
   calculatePrice() {
     let rentalPrice = this.driverAge; // Minimum price per day = driver's age
 
-    // Price increase for Racers if driver is under 25 years old (except low season)
+    // Price increase for Racers if driver is under 25 years old (only in low season)
     if (
       this.carType === "Racer" &&
       this.driverAge <= 25 &&
@@ -75,10 +74,10 @@ class CarRental {
       rentalPrice += CarRental.LICENSE_YEARS_SURCHARGES.LESS_THAN_THREE;
     }
 
-    // Discount for long term rentals (except high season)
-    if (this.rentalDays > 10 && !this.isHighSeason()) {
-      rentalPrice *= CarRental.LONG_RENT_DISCOUNT;
-    }
+
+
+
+
 
     // Calculation of the final price including weekends
     let totalPrice = 0;
@@ -94,9 +93,28 @@ class CarRental {
       totalPrice += finalDailyPrice;
     }
 
-    return totalPrice.toFixed(2);
+    // Discount for long term rentals (except high season)
+    if (this.rentalDays > 10 && !this.isHighSeason()) {
+      totalPrice *= CarRental.LONG_RENT_DISCOUNT;
+    }
 
+    return totalPrice.toFixed(2);
   }
 }
 
-module.exports = CarRental;
+function getPrice(pickupDate, dropoffDate, carType, driverAge, licenseYears) {
+  const startDate = new Date(pickupDate);
+  const endDate = new Date(dropoffDate);
+  const rentalDays = Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24));
+
+  const rental = new CarRental(
+    driverAge,
+    licenseYears,
+    carType,
+    rentalDays,
+    startDate
+  );
+  return `$${rental.calculatePrice()}`;
+}
+
+module.exports = { CarRental, getPrice };
